@@ -3,6 +3,11 @@
 # author: qiangguo
 # last_modify: 20180515
 
+'''
+    学习使用python smptlib 发送邮件
+
+'''
+
 from email.mime.text  import MIMEText    # 构建文本实例
 from email.mime.multipart import MIMEMultipart  # 构建多媒体形式
 from email.mime.image import MIMEImage  # 构建图片形式
@@ -15,6 +20,7 @@ from_addr = "569776435@qq.com"
 password = "tdcxngprhpgmbbic"     # 在qq邮箱生成的三方客户端使用的密码
 to_addr = "qiangguo22@creditease.cn"
 smtp_server = "smtp.qq.com"
+
 
 
 def mail():
