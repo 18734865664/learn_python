@@ -67,8 +67,8 @@ def mail():
         # 登陆
         server.login(from_addr, password)
         # 发送邮件
-        import pdb; pdb.set_trace()
-        server.sendmail(from_addr, [to_addr], msg.as_string())
+        # import pdb; pdb.set_trace()
+        server.sendmail(from_addr, [from_addr], msg.as_string())
         print("邮件发送成功")
     except Exception:
         print("邮件发送失败")
