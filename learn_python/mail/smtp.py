@@ -18,7 +18,7 @@ from email.utils import formataddr
 # 定义变量
 from_addr = "******@qq.com"
 password = "tdcxngprhpgmbbic"     # 在qq邮箱生成的三方客户端使用的密码
-to_addr = "qiangguo22@creditease.cn"
+to_addr = "qiangguo22@*****"
 smtp_server = "smtp.qq.com"
 
 

@@ -1,7 +1,7 @@
 #! /usr/local/python3/bin/python3
 # encoding: utf-8
 # author: qiangguo
-# last_modify: 20180515
+# last_modify: 20180516
 
 """
     imaplib 模块定义了三个类：
