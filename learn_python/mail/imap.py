@@ -14,22 +14,42 @@
     官方文档：https://docs.python.org/3.6/library/imaplib.html
 """
 
-from imaplib import IMAP4_SSL:
+from imaplib import IMAP4_SSL
 import email
 
 # 定义变量
 imap_server = "pop.qq.com" 
-user = "569776435@qq.com"
+user = "******@qq.com"
 password = "tdcxngprhpgmbbic" 
 
- def recevie_mail():
-    try:
-        # 实例化imap服务器
-        recevie_server = IMAP4_SSL(imap_server)
-        recevie_server.login(user, password)
-        # recevie_server.list()    # 查看所有的文件夹(IMAP可以支持创建文件夹)
-        # recevie_server.select()  # 默认选择文件夹是“INBOX”
-        # recevie_server.search()  # 两个参数，第一个是charset，通常为None(ASCII),第二个参数决定检索的关键字，参考http://afterlogic.com/mailbee-net/docs/MailBee.ImapMail.Imap.Search_overload_2.html
-        # recevie_server.fetch(messages_set, message_parts), 两个参数，第一个是邮件的索引，第二个是决定是抓取message中的哪些部分，参考文档http://james.apache.org/server/rfclist/imap4/rfc2060.txt
+def recevie_mail():
+   try:
+       # 实例化imap服务器
+       recevie_server = IMAP4_SSL(imap_server)
+       recevie_server.login(user, password)
+       # recevie_server.list()    # 查看所有的文件夹(IMAP可以支持创建文件夹)
+       # recevie_server.select("Inbox")  # 默认选择文件夹是“INBOX”
+       # recevie_server.search(None, "ALL")  # 两个参数，第一个是charset，通常为None(ASCII),第二个参数决定检索的关键字,ALL表示所有邮件，SEEN表示已读邮件，NEW表示未读邮件，参考http://afterlogic.com/mailbee-net/docs/MailBee.ImapMail.Imap.Search_overload_2.html
+       # recevie_server.fetch(messages_set, message_parts), 两个参数，第一个是邮件的索引，第二个是决定是抓取message中的哪些部分，参考文档http://james.apache.org/server/rfclist/imap4/rfc2060.txt
+       recevie_server.select()
+       print("+" * 10 + "获取单份邮件" + "+" * 10)
+       import pdb; pdb.set_trace()
+       print(recevie_server.fetch(recevie_server.select("Inbox")[1][0].decode(), "(BODY[HEADER])")[1][0][1].decode())
+       print("+" * 10 + "获取多份邮件" + "+" * 10)
+       for i in recevie_server.fetch("98:100", "(BODY[HEADER])")[1]:
+           try:
+               print(i[1].decode())
+               print( "+" * 30 + "\n")
+           except:
+               pass
+
+   except Exception as err:
+       print(err)
+   finally:
+       recevie_server.logout()
+
+
+if __name__ == "__main__":
+    recevie_mail()
         
 

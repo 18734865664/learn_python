@@ -7,7 +7,7 @@ from poplib import POP3_SSL
 
 # 定义变量
 pop_server = "pop.qq.com"
-user = "569776435@qq.com"
+user = "******@qq.com"
 password = "tdcxngprhpgmbbic"
 
 
