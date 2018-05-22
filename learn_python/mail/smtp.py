@@ -27,7 +27,7 @@ def mail():
     
     # 定义邮件内容相关
     # 实例化多媒体邮件实例
-    msg = MIMEMultipart()
+    msg = MIMEMultipart(alternative)    # 传递alternative作为唯一的参数实例化，不传这个参数，有的邮件服务器，attach进去的纯文本、图片回作为消息的附件传输
     
     # 定义文本组件  plain   html
     # msg = MIMEText("hello, send by gq...", 'plain', 'utf-8')  # 邮件正文内容，普通文本
