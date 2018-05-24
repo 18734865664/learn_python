@@ -1,0 +1,132 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job@2.18">
+  <actions/>
+  <description>10.100.140.117</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty plugin="gitlab-plugin@1.5.5">
+      <gitLabConnection></gitLabConnection>
+    </com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty>
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.28">
+      <autoRebuild>false</autoRebuild>
+      <rebuildDisabled>false</rebuildDisabled>
+    </com.sonyericsson.rebuild.RebuildSettings>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>-1</daysToKeep>
+        <numToKeep>9</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>branch_parents</name>
+          <description> </description>
+          <defaultValue>http://10.100.146.60:9093/svn/newsettle/ns/trunk/ns/code/ns-online</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <org.biouno.unochoice.ChoiceParameter plugin="uno-choice@2.1">
+          <name>ftp_path</name>
+          <description>上传ftp的路径</description>
+          <randomName>choice-parameter-4708535551208035</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.43">
+              <script>def command = &quot;cat /app/scripts/jenkins/path.txt|grep OnlineTest&quot;
+def proc = [&apos;bash&apos;,&apos;-c&apos;,command].execute()
+proc.waitFor()
+branchs = proc.text.readLines()</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.43">
+              <script></script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>ns</projectName>
+          <choiceType>PT_SINGLE_SELECT</choiceType>
+          <filterable>true</filterable>
+          <filterLength>1</filterLength>
+        </org.biouno.unochoice.ChoiceParameter>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>mvn_args</name>
+          <description>打包参数
+生产包：prod
+准生产包：preprod</description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>prod</string>
+              <string>preprod</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <org.biouno.unochoice.ChoiceParameter plugin="uno-choice@2.1">
+          <name>deploy_preprod</name>
+          <description>是否部署准生产</description>
+          <randomName>choice-parameter-6661896945916159</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.43">
+              <script>return [&apos;no&apos;,&apos;yes&apos;]</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.43">
+              <script>return [&apos;error&apos;]</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>ns</projectName>
+          <choiceType>PT_SINGLE_SELECT</choiceType>
+          <filterable>false</filterable>
+          <filterLength>1</filterLength>
+        </org.biouno.unochoice.ChoiceParameter>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.48">
+    <script>node {
+    
+    stage(&apos;检出代码&apos;) {
+        
+        checkout([$class: &apos;SubversionSCM&apos;, additionalCredentials: [], excludedCommitMessages: &apos;&apos;, excludedRegions: &apos;&apos;, excludedRevprop: &apos;&apos;, excludedUsers: &apos;&apos;, filterChangelog: false, ignoreDirPropChanges: false, includedRegions: &apos;&apos;, locations: [[cancelProcessOnExternalsFail: true, credentialsId: &apos;3f9ed9af-5382-4f32-80ce-e1b6aea6062c&apos;, depthOption: &apos;infinity&apos;, ignoreExternalsOption: true, local: &apos;.&apos;, remote: &apos;${branch_parents}&apos;]], quietOperation: false, workspaceUpdater: [$class: &apos;UpdateUpdater&apos;]])
+    }
+    
+    stage(&apos;mvn打包&apos;) {
+        sh &quot;cd $WORKSPACE&quot;
+        sh &quot;mvn clean package -Dmaven.test.skip=true -P ${mvn_args}&quot;
+    }
+    
+    stage(&quot;上传至svn&quot;) {
+        sh &apos;ssh 10.100.142.254  &quot;mkdir -pv /data/ftp/pub/01-online/01-OnlineTest/${ftp_path}/${JOB_NAME}_${mvn_args}&quot;|tee ../docker_images.txt&apos;
+        sh &quot;rsync -az  --progress $WORKSPACE/target/*.war rsync_backup@10.100.142.254::10.100.142.254_ftp/${ftp_path}/${JOB_NAME}_${mvn_args}/ --password-file=/etc/rsync.password&quot;
+    }
+    /*
+    stage(&quot;显示image_tag&quot;){
+            echo &apos;+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++&apos;
+            echo &quot;&quot;
+            sh &quot;awk -F &apos;构建镜像成功&apos; &apos;/构建镜像成功/{match(\$2,/([^=]*)/,a);print a[0]}&apos; ../docker_images.txt &quot;
+    }
+    */
+    if (&quot;${deploy_preprod}&quot; == &quot;yes&quot;){
+        def remote_host = [&quot;10.100.140.117&quot;]
+        for (i=0;i&lt; remote_host.size();i ++){
+            stage(&quot;部署准生产--${remote_host[i]}&quot;){
+                def commands_tmp = &quot;ssh ${remote_host[i]}  &apos;sh /app/scripts/jenkins/deploy.sh  ns  /${ftp_path}/${JOB_NAME}_${mvn_args}&apos;&quot;
+                sh &quot;${commands_tmp}&quot;
+            }
+        }
+    }
+    /*
+    stage(&quot;上传至阿里云svn&quot;) {
+        sh &quot;rsync -az  --progress $WORKSPACE/target/*.war rsync_backup@101.200.157.143::10.44.49.6_ftp/${ftp_path}/${JOB_NAME}_${mvn_args}/ --password-file=/etc/rsync.password&quot;
+    }
+    */
+    
+}</script>
+    <sandbox>true</sandbox>
+  </definition>
+  <triggers/>
+  <disabled>false</disabled>
+</flow-definition>
