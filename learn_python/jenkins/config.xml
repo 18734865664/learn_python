@@ -1,7 +1,7 @@
 <?xml version='1.1' encoding='UTF-8'?>
 <flow-definition plugin="workflow-job@2.18">
   <actions/>
-  <description>10.100.140.117</description>
+  <description>10.100.140.108</description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty plugin="gitlab-plugin@1.5.5">
@@ -24,7 +24,7 @@
         <hudson.model.StringParameterDefinition>
           <name>branch_parents</name>
           <description> </description>
-          <defaultValue>http://10.100.146.60:9093/svn/newsettle/ns/trunk/ns/code/ns-online</defaultValue>
+          <defaultValue>http://10.100.146.60:9093/svn/newsettle/ns/trunk/ns/code/collate/collate</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <org.biouno.unochoice.ChoiceParameter plugin="uno-choice@2.1">
@@ -45,7 +45,7 @@ branchs = proc.text.readLines()</script>
               <sandbox>false</sandbox>
             </secureFallbackScript>
           </script>
-          <projectName>ns</projectName>
+          <projectName>collate</projectName>
           <choiceType>PT_SINGLE_SELECT</choiceType>
           <filterable>true</filterable>
           <filterLength>1</filterLength>
@@ -54,18 +54,57 @@ branchs = proc.text.readLines()</script>
           <name>mvn_args</name>
           <description>打包参数
 生产包：prod
-准生产包：preprod</description>
+</description>
           <choices class="java.util.Arrays$ArrayList">
             <a class="string-array">
               <string>prod</string>
-              <string>preprod</string>
             </a>
           </choices>
         </hudson.model.ChoiceParameterDefinition>
         <org.biouno.unochoice.ChoiceParameter plugin="uno-choice@2.1">
+          <name>subitems_name</name>
+          <description></description>
+          <randomName>choice-parameter-6318967070764829</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.43">
+              <script>branch=[&quot;bash&quot;,&apos;-c&apos;,&apos;cd  /app/jenkins/jobs/collate/workspace;svn list  |grep  -i -E  &quot;impl|fram&quot;&apos;].execute().text.readLines()</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.43">
+              <script>return [&quot;error&quot;]</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>collate</projectName>
+          <choiceType>PT_CHECKBOX</choiceType>
+          <filterable>false</filterable>
+          <filterLength>1</filterLength>
+        </org.biouno.unochoice.ChoiceParameter>
+        <org.biouno.unochoice.ChoiceParameter plugin="uno-choice@2.1">
+          <name>config_file</name>
+          <description></description>
+          <randomName>choice-parameter-7430287389346194</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.43">
+              <script>return [&quot;no&quot;,&quot;yes&quot;]</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.43">
+              <script>return [&quot;error&quot;]</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>collate</projectName>
+          <choiceType>PT_SINGLE_SELECT</choiceType>
+          <filterable>false</filterable>
+          <filterLength>1</filterLength>
+        </org.biouno.unochoice.ChoiceParameter>
+        <org.biouno.unochoice.ChoiceParameter plugin="uno-choice@2.1">
           <name>deploy_preprod</name>
           <description>是否部署准生产</description>
-          <randomName>choice-parameter-6661896945916159</randomName>
+          <randomName>choice-parameter-7787738922309378</randomName>
           <visibleItemCount>1</visibleItemCount>
           <script class="org.biouno.unochoice.model.GroovyScript">
             <secureScript plugin="script-security@1.43">
@@ -77,7 +116,7 @@ branchs = proc.text.readLines()</script>
               <sandbox>false</sandbox>
             </secureFallbackScript>
           </script>
-          <projectName>ns</projectName>
+          <projectName>collate</projectName>
           <choiceType>PT_SINGLE_SELECT</choiceType>
           <filterable>false</filterable>
           <filterLength>1</filterLength>
@@ -98,22 +137,32 @@ branchs = proc.text.readLines()</script>
         sh &quot;mvn clean package -Dmaven.test.skip=true -P ${mvn_args}&quot;
     }
     
-    stage(&quot;上传至svn&quot;) {
-        sh &apos;ssh 10.100.142.254  &quot;mkdir -pv /data/ftp/pub/01-online/01-OnlineTest/${ftp_path}/${JOB_NAME}_${mvn_args}&quot;|tee ../docker_images.txt&apos;
-        sh &quot;rsync -az  --progress $WORKSPACE/target/*.war rsync_backup@10.100.142.254::10.100.142.254_ftp/${ftp_path}/${JOB_NAME}_${mvn_args}/ --password-file=/etc/rsync.password&quot;
+    stage(&quot;上传至ftp&quot;) {
+        def args = subitems_name.split(&quot;,&quot;)
+        sh &apos;ssh 10.100.142.254  &quot;mkdir -pv /data/ftp/pub/01-online/01-OnlineTest/${ftp_path}/${JOB_NAME}_${mvn_args}/61_jar_dir&quot;&apos;
+        for (i=0;i &lt; args.size() ;i++){
+            sh &quot;rsync -az  --progress $WORKSPACE/${args[i]}/target/*.jar rsync_backup@10.100.142.254::10.100.142.254_ftp/${ftp_path}/${JOB_NAME}_${mvn_args}/61_jar_dir --password-file=/etc/rsync.password&quot;
+            if(&quot;${args[i]}&quot; == &quot;framework/&quot; &amp;&amp; &quot;${config_file}&quot; == &quot;yes&quot;){
+                sh &quot;rsync -az  --progress $WORKSPACE/framework/target/classes/config/  rsync_backup@10.100.142.254::10.100.142.254_ftp/${ftp_path}/${JOB_NAME}_${mvn_args}/61_config --password-file=/etc/rsync.password&quot;
+            } else if (&quot;${args[i]}&quot; == &quot;implement/&quot; &amp;&amp; &quot;${config_file}&quot; == &quot;yes&quot;){
+                continue
+            }
+        }
     }
+    
     /*
-    stage(&quot;显示image_tag&quot;){
-            echo &apos;+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++&apos;
-            echo &quot;&quot;
-            sh &quot;awk -F &apos;构建镜像成功&apos; &apos;/构建镜像成功/{match(\$2,/([^=]*)/,a);print a[0]}&apos; ../docker_images.txt &quot;
+    if (&quot;${mvn_args}&quot; == &quot;prod&quot;){
+        stage(&quot;build镜像&quot;) {
+                def commands_tmp = &quot;ssh 10.100.146.186  &apos;sh /app/autodeploy/bin/release.sh ${JOB_NAME} /${ftp_path}/${JOB_NAME}_${mvn_args}/61_jar_dir&apos;&quot;
+                sh &quot;${commands_tmp}&quot;
+        }
     }
     */
     if (&quot;${deploy_preprod}&quot; == &quot;yes&quot;){
-        def remote_host = [&quot;10.100.140.117&quot;]
+        def remote_host = [&quot;10.100.140.108&quot;]
         for (i=0;i&lt; remote_host.size();i ++){
             stage(&quot;部署准生产--${remote_host[i]}&quot;){
-                def commands_tmp = &quot;ssh ${remote_host[i]}  &apos;sh /app/scripts/jenkins/deploy.sh  ns  /${ftp_path}/${JOB_NAME}_${mvn_args}&apos;&quot;
+                def commands_tmp = &quot;ssh ${remote_host[i]}  &apos;sh /app/scripts/jenkins/deploy.sh  ${JOB_NAME}  /${ftp_path}/${JOB_NAME}_${mvn_args}&apos;&quot;
                 sh &quot;${commands_tmp}&quot;
             }
         }
