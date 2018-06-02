@@ -3,12 +3,12 @@
 
 import pymysql
 import sys
-sys.path.insert(0, '/data/nfs/python/learn_python/jenkins/')
-from get_file_list import  getFileList
-from get_args import getJenkinsArgs
-import get_args
+import os
+sys.path.insert(0, os.getcwd())
+from .get_file_list import  getFileList
+from .get_args import getJenkinsArgs
 
-class update_mysql():
+class updateMysql():
     def __init__(self):
         self.mysql_host = "10.100.137.179"
         self.mysql_user = "root"
@@ -36,22 +36,32 @@ class update_mysql():
               `branch_parents` VARCHAR(1000) NOT NULL DEFAULT 'NULL', \
               `ftp_path` VARCHAR(100) NOT NULL DEFAULT 'NULL', \
               `mvn_args`VARCHAR(50) NOT NULL DEFAULT '\[\"prod\"\]', \
-              `subitems_name` VARCHAR(200) NOT NULL DEFAULT 'NULL'  \
+              `subitems_name` VARCHAR(200) NOT NULL DEFAULT 'NULL',  \
+              `laster_build_num` int(3)   \
               );".format(("job_args"))
         cursor.execute(sql1)
+        db.commit()
+        db.close()
 
         # 获取job列表
         job_name_file_obj = getFileList("/data/nfs/jenkins/jobs/").get_file_list()
         
         # 获取参数列表
         for job_name in job_name_file_obj:
+            db = pymysql.connect(host = self.mysql_host, user = self.mysql_user, passwd = self.mysql_pass, port = int(self.mysql_port))
+            cursor = db.cursor() 
             job_workspace_file = '/data/nfs/jenkins/jobs/' + job_name
             job_config_file = job_workspace_file + "/config.xml"
             obj = getJenkinsArgs(job_config_file, job_name)
-        
+            f = open(job_workspace_file + "/nextBuildNumber", 'r')
+            build_num = f.readline()
+            sql_build_num = "update jenkins_info.job_args set laster_build_num={} where job_name = \"{}\";".format(build_num, job_name)
+            cursor.execute(sql_build_num)
+            db.commit()
+            db.close()
  
 
 if __name__ == "__main__":
-    obj = update_mysql()
+    obj = updateMysql()
     obj.create_job_args_table()
         

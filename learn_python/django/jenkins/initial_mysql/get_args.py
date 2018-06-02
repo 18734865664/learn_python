@@ -8,8 +8,9 @@ import re
 import time
 import pymysql
 import sys
-sys.path.insert(0, '/data/nfs/python/learn_python/jenkins/')
-from get_file_list import getFileList
+import os
+sys.path.insert(0, os.getcwd())
+from .get_file_list import getFileList
 
 """ 
 getArgs: 
@@ -53,11 +54,11 @@ class getArgs(xml.sax.ContentHandler):
             for i in self.args.keys():
                 if i in args_list:
                     field_name = field_name + ", " + i 
-                    field_args = field_args + ', ' + '"' + str(self.args[i]) + '"' 
+                    field_args = field_args + ', ' + '"' + ','.join(self.args[i]) + '"' 
                     if field_update:
-                        field_update = field_update + ', '  + i + "=" + '"' + str(self.args[i]) + '"'
+                        field_update = field_update + ', '  + i + "=" + '"' + ','.join(self.args[i]) + '"'
                     else:
-                        field_update = field_update + i + "=" + '"' + str(self.args[i]) + '"'
+                        field_update = field_update + i + "=" + '"' + ','.join(self.args[i]) + '"'
                     
             sql_insert = "insert INTO jenkins_info.job_args ({}) VALUES ({});".format(field_name, field_args)
             sql_update = "update jenkins_info.job_args set {} where job_name = {}".format(field_update, '"' + self.job_name.replace("-", "_") + '"')
@@ -67,7 +68,7 @@ class getArgs(xml.sax.ContentHandler):
             if cursor.fetchall()[0][0] < 1:
                 cursor.execute(sql_insert)
             else:
-                print(sql_update)
+                # print(sql_update)
                 if not field_update:
                     pass
                 else:
@@ -82,8 +83,8 @@ class getArgs(xml.sax.ContentHandler):
                 # import pdb; pdb.set_trace()
             except:
                 pass
-            if not self.ftp_file_tag + self.time_tag in self.args["ftp_path"]:
-                self.args["ftp_path"].append(self.ftp_file_tag + self.time_tag)
+            if not self.ftp_file_tag + "_v0.0_" + self.time_tag in self.args["ftp_path"]:
+                self.args["ftp_path"].append(self.ftp_file_tag + "_v0.0_" + self.time_tag)
         
 
     def characters(self, content):

@@ -1,0 +1,61 @@
+#! /usr/local/python3/bin/python3
+from django.shortcuts import render
+from django.conf import settings
+
+# Create your views here.
+from django.http import HttpResponseRedirect ,HttpResponse ,StreamingHttpResponse
+import subprocess
+from initial_mysql.update_mysql import updateMysql
+import pymysql
+from django.views.decorators.csrf import csrf_exempt 
+import jenkins
+from jenkins_api.jenkins_api import build_jenkins_api
+
+
+
+def test(request):
+    # return HttpResponse(u'hello')
+    return render(request, 'build_jenkins/index.html')
+
+@csrf_exempt
+def build(request):
+    # 初始化job_args表
+    obj = updateMysql()
+    obj.create_job_args_table()
+
+    # 接收request请求
+    if request.method == "GET":
+        return HttpResponseRedirect("/build_jenkins/") 
+    elif request.method == "POST":
+        jenkins_obj_name = request.POST['jenkins_obj_name']
+        timestamp = request.POST['timestamp']
+        # 从数据库中查询套餐对应应用列表
+        db = pymysql.connect(host = settings.MYSQL_HOST, user = settings.MYSQL_USER, passwd = settings.MYSQL_PASS, port = int(settings.MYSQL_PORT))
+        cursor = db.cursor() 
+        sql = 'select jenkins_obj_member from jenkins_info.jenkins_obj where jenkins_obj_name = \"{}\"'.format(jenkins_obj_name)
+        cursor.execute(sql)
+        jenkins_build_list_tmp = cursor.fetchall()[0][0]
+        try:
+            jenkins_build_list = jenkins_build_list_tmp.split(',')
+        except:
+            jenkins_build_list = jenkins_build_list_tmp.split() 
+        for jenkins_build in jenkins_build_list:
+            sql_build_args = "select * from jenkins_info.job_args where job_name = \"{}\"".format(jenkins_build.replace('-', '_'))
+            cursor.execute(sql_build_args)
+            build_args = list(cursor.fetchall()[0])
+            # 实例化jenkins
+            # return HttpResponse(dir(jenkins))
+            data = {
+                "branch_parents": build_args[2],
+                "ftp_path": build_args[3],
+                "mvn_args": build_args[4],
+                "subitems": build_args[5],
+                "laster_build_num": build_args[6]
+            }
+            build_jenkins_obj = build_jenkins_api()
+            build_jenkins_obj.build_jenkins_api(data)
+        return HttpResponse("hello")
+    
+    # # 调用jenkins-api
+    # subprocess.call(['curl -X  POST http://jenkins:jenkins@10.100.140.161:8080/job/ceshi_pip/buildWithParameters -d "test1=aaaa&test2=cccc"'], shell=True)    
+    # return HttpResponse(u'world')
