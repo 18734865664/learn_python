@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block css %}
+    <meta http-equiv="refresh" content="4; url=/histrecord/executerecord/"/>
+{% endblock %}
+{% block content %}
+    <div id="page-wrapper">
+        <div class="row">
+            <div class="col-lg-12">
+                <h3 class="page-header">提示</h3>
+            </div>
+            <!-- /.col-lg-12 -->
+        </div>
+        <!-- /.row -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="col-lg-12">
+                    <div class="panel panel-info">
+                        <div class="panel-heading">
+                            Info
+                        </div>
+                        <div class="panel-body">
+
+                            <p><font color="red"><strong>{{ Action.0 }} {{ Action.1 }}</strong></font> 操作成功，正在跳转。。。</p>
+
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+            <!-- /.col-lg-12 -->
+        </div>
+
+    </div>
+    <!-- /#page-wrapper -->
+{% endblock %}

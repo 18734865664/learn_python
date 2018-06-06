@@ -1,0 +1,232 @@
+{% extends "base.html" %}
+{% block css %}
+    <link href="/static/vendor/bootstrap/css/bootstrap-multiselect.css" rel="stylesheet"/>
+{% endblock %}
+{% block content %}
+
+    <div id="page-wrapper">
+    <div class="row">
+        <div class="col-lg-12">
+            <h3 class="page-header"></h3>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    代码回滚
+                </div>
+                <!-- /.panel-heading -->
+                <div class="panel-body">
+                    <div class="dataTable_wrapper">
+                        <form class="form-horizontal" method="post" action="" onsubmit="return check()">
+                            {% csrf_token %}
+                            <!-- Text input-->
+                            <div class="form-group">
+                                <label class="col-md-4 control-label" for="textinput">项目名称</label>
+                                <div class="col-md-4">
+                                    {% if form.project_name.errors %}
+                                        <div class="alert alert-danger text-center">
+                                            <button type="button" class="close" data-dismiss="alert">×</button>
+                                            {{ form.project_name.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                    {{ form.project_name }}
+                                </div>
+                            </div>
+
+                            <!-- Text input-->
+                            <div class="form-group">
+                                <label class="col-md-4 control-label" for="">同步路径</label>
+                                <div class="col-md-4">
+                                    {% if form.sync_path.errors %}
+                                        <div class="alert alert-danger text-center">
+                                            <button type="button" class="close" data-dismiss="alert">×</button>
+                                            {{ form.sync_path.errors.0 }}
+                                        </div>{% endif %}
+                                    {{ form.sync_path }}
+                                </div>
+                            </div>
+
+                            <!-- Text input-->
+                            <div class="form-group">
+                                <label class="col-md-4 control-label" for="">同步模块</label>
+                                <div class="col-md-4">
+                                    {% if form.sync_module.errors %}
+                                        <div class="alert alert-danger text-center">
+                                            <button type="button" class="close" data-dismiss="alert">×</button>
+                                            {{ form.sync_module.errors.0 }}
+                                        </div>{% endif %}
+                                    {{ form.sync_module }}
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-md-4 control-label" for="">过滤参数</label>
+                                <div class="col-md-4">
+                                    {% if form.exclude_parameter.errors %}
+                                        <div class="alert alert-danger text-center">
+                                            <button type="button" class="close" data-dismiss="alert">×</button>
+                                            {{ form.exclude_parameter.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                    {{ form.exclude_parameter }}
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-md-4 control-label" for="">变更内容</label>
+                                <div class="col-md-4">
+                                    {% if form.change_content.errors %}
+                                        <div class="alert alert-danger text-center">
+                                            <button type="button" class="close" data-dismiss="alert">×</button>
+                                            {{ form.change_content.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                    {{ form.change_content }}
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-md-4 control-label" for="">回滚版本</label>
+                                <div class="col-md-4">
+                                    <select class="form-control" id="select-commit" name="rollback_commit">
+                                        <option value="">--请选择版本--</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Select Multiple -->
+                            <div class="form-group">
+                                <label class="col-md-4 control-label" for="">目标主机</label>
+                                <div class="col-md-4">
+                                    <select id="select-hosts-mu" multiple="multiple" name="target_host" hidden="hidden">
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-md-4 control-label">{{ form.restart_service.label }} </label>
+                                {% for i in form.restart_service %}
+                                    {{ i }}
+                                {% endfor %}
+                            </div>
+                            <!-- Modal -->
+                            <div class="modal fade" id="pushbutton" tabindex="-1" role="dialog"
+                                 aria-labelledby="pushbutton" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal"
+                                                    aria-label="Close"><span aria-hidden="true">&times;</span>
+                                            </button>
+                                            <h4 class="modal-title" id="myModalLabel">操作确认</h4>
+                                        </div>
+                                        <div class="modal-body">
+                                            <font color="red"><strong>点击"抄送"输入收件人,多人以逗号分割,完成后点击执行上线操作</strong></font>
+                                            <div class="compose-mail col-md-offset-1">
+                                                <div class="form-group input-group col-md-10">
+                                                    <span class="input-group-addon">To:</span>
+                                                    <input type="text" class="form-control" name="mailto"
+                                                           value="yunwei@happyjuzi.com" readonly>
+                                                    <span class="input-group-addon"
+                                                          onclick="$(this).hide(); $('#cc').parent().removeClass('hidden'); $('#cc').focus();"
+                                                          href="javascript:;">抄送</span>
+                                                </div>
+                                                <div class="form-group hidden input-group col-md-10">
+                                                    <span class="input-group-addon">Cc:</span>
+                                                    <input type="text" tabindex="2" id="cc" name="mailcc"
+                                                           class="form-control">
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-default" data-dismiss="modal">取消
+                                            </button>
+                                            <button type="submit" class="btn btn-danger">执行</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- /.modal -->
+                        </form>
+                        <!-- Button -->
+                        <label class="col-md-4 control-label" for="singlebutton"></label>
+                        <div class="col-md-4">
+                            <button class="btn btn-primary" data-toggle="modal" data-target="#pushbutton">
+                                推送
+                            </button>
+                        </div>
+                    </div>
+                    <!-- /.table-responsive -->
+                </div>
+                <!-- /.panel-body -->
+            </div>
+            <!-- /.panel -->
+        </div>
+        <!-- /.col-lg-12 -->
+    </div>
+
+{% endblock %}
+
+{% block jquery %}
+    <script src="/static/js/bootstrap-multiselect.js"></script>
+
+    <script type="text/javascript">
+        function check() {
+            var nameValue = window.document.getElementById("select-hosts-mu").value;
+            var nameValue1 = window.document.getElementById("select-commit").value;
+            if (nameValue == "" || nameValue1 == "") // 或者是!nameValue
+            {
+                window.alert("选择主机和回滚版本");
+                return false;
+            }
+            return true;
+        }
+    </script>
+
+    <script type="text/javascript">
+        function getcnfoptions(cnfid) {
+            $.ajax({
+                type: "GET",
+                url: "/codeupdates/code_updates/get_cnf_list?cnfid=" + cnfid,
+                dataType: 'json',
+                success: function (data) {
+                    $('input[name=sync_path]').val(data[0].sync_path);
+                    $('input[name=sync_module ]').val(data[0].sync_module);
+                    $('textarea[name=exclude_parameter]').val(data[0].exclude_parameter);
+                    console.log(data[0].target_host)
+                    var hostlist = data[0].target_host.split(',');
+                    for (var i = 0; i < hostlist.length; i++) {
+                        $("#select-hosts-mu").append('<option value="' + hostlist[i] + '">' + hostlist[i] + '</option>')
+                    }
+                    $(document).ready(function () {
+                        $('#select-hosts-mu').multiselect({
+                            nonSelectedText: '--请选择主机--',
+                            includeSelectAllOption: true,
+                            allSelectedText: '全部选则'
+                        });
+                    });
+                    $.ajax({
+                        type: "GET",
+                        url: "/codeupdates/get_rollback_commit?sync_path=" + data[0].sync_path,
+                        dataType: 'json',
+                        success: function (datas) {
+                            console.log(datas)
+                            var commitlist = datas
+                            for (var i = 0; i < commitlist.length; i++) {
+                                console.log(commitlist[i].commit_id)
+                                $("#select-commit").append('<option value="' + commitlist[i].commit_id + '">' + commitlist[i].commit_author + ' ---- ' + commitlist[i].commit_id + '--' + commitlist[i].commit_message + ' ---- ' + commitlist[i].date_time + '</option>')
+                            }
+                        }
+                    })
+                }
+
+            })
+        }
+
+    </script>
+
+{% endblock %}

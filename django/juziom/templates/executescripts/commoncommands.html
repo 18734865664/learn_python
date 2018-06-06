@@ -1,0 +1,272 @@
+{% extends "base.html" %}
+{% block content %}
+    <div id="page-wrapper">
+        <div class="row">
+            <div class="col-lg-12">
+                <h2 class="page-header"></h2>
+            </div>
+            <!-- /.col-lg-12 -->
+        </div>
+        <!-- /.row -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        常用脚本执行
+                    </div>
+                    <!-- /.panel-heading -->
+                    <div class="panel-body">
+                        <!-- /.table-responsive -->
+                        <button class="btn btn-warning" data-toggle="modal" data-target="#shellModal">SHELL</button>
+                        <button class="btn btn-warning" data-toggle="modal" data-target="#phpModal">PHP</button>
+                    </div>
+                    <!-- /.panel-body -->
+                </div>
+                <!-- /.panel -->
+            </div>
+            <!-- /.col-lg-12 -->
+        </div>
+
+        <div class="modal fade" id="phpModal" tabindex="-1" role="dialog" aria-labelledby="myModal" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h5 class="modal-title" id="myModalLabel">执行PHP脚本</h5>
+                    </div>
+                    <div class="modal-body">
+
+                        <form class="form-horizontal" method="post" action="" onsubmit="return check()">
+                            {% csrf_token %}
+
+                            <div class="form-group">
+                                <label class="col-md-4 control-label" for="textinput">项目名称</label>
+                                <div class="col-md-4">
+                                    <select class="form-control" id="id_project_name" name="project_name"
+                                            onchange="getphpscripts(this.value)">
+                                        <option value="" selected="selected">选择项目</option>
+                                        {% for i in project_from_sql %}
+                                            <option value="{{ i.id }}">{{ i.project_name }}</option>
+                                        {% endfor %}
+                                    </select>
+
+                                </div>
+                            </div>
+
+
+                            <!-- Text input-->
+                            <div class="form-group">
+                                <label class="col-md-4 control-label" for="">执行脚本</label>
+                                <div class="col-md-4">
+                                    <select class="form-control" id="select-script-file" name="script-file">
+
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-md-4 control-label" for="">执行参数</label>
+                                <div class="col-md-4">
+
+                                    <input class="form-control" name="execute_param" type="text">
+                                </div>
+                            </div>
+
+
+                            <!-- Select Multiple -->
+                            <div class="form-group">
+                                <label class="col-md-4 control-label" for="">目标主机</label>
+                                <div class="col-md-4">
+                                    <select id="select-hosts-mu" multiple="multiple" name="target_host" hidden="hidden">
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group" hidden="hidden">
+                                <label class="col-md-4 control-label" for="">脚本类型</label>
+                                <div class="col-md-4">
+
+                                    <input class="form-control" name="script_type" value="php" readonly>
+                                </div>
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                                <button type="submit" class="btn btn-primary">执行</button>
+                            </div>
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+        <!-- /.modal -->
+        </form>
+    </div>
+
+
+    <div class="modal fade" id="shellModal" tabindex="-1" role="dialog" aria-labelledby="myModal"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h5 class="modal-title" id="myModalLabel">执行SHELL脚本</h5>
+                </div>
+                <div class="modal-body">
+
+                    <form class="form-horizontal" method="post" action="" onsubmit="return check1()">
+                        {% csrf_token %}
+
+                        <div class="form-group">
+                            <label class="col-md-4 control-label" for="textinput">项目名称</label>
+                            <div class="col-md-4">
+                                <select class="form-control" id="id_project_name1" name="project_name1"
+                                        onchange="getshellscripts(this.value)">
+                                    <option value="" selected="selected">选择项目</option>
+                                    {% for i in project_from_sql %}
+                                        <option value="{{ i.id }}">{{ i.project_name }}</option>
+                                    {% endfor %}
+                                </select>
+
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-md-4 control-label" for="">执行脚本</label>
+                            <div class="col-md-4">
+                                <select class="form-control" id="select-script-file" name="script-file">
+                                    <option value="">选择执行脚本</option>
+                                    {% for i in execute_script_config %}
+                                        <option value="{{ i.script_path }}">{{ i.script_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-md-4 control-label" for="">执行参数</label>
+                            <div class="col-md-4">
+
+                                <input class="form-control" name="execute_param" type="text">
+                            </div>
+                        </div>
+
+                        <!-- Select Multiple -->
+                        <div class="form-group">
+                            <label class="col-md-4 control-label" for="">目标主机</label>
+                            <div class="col-md-4">
+                                <select id="select-hosts-mu1" multiple="multiple" name="target_host"
+                                        hidden="hidden">
+                                </select>
+                            </div>
+                        </div>
+                        <!-- /.modal -->
+
+                        <div class="form-group" hidden="hidden">
+                            <label class="col-md-4 control-label" for="">脚本类型</label>
+                            <div class="col-md-4">
+
+                                <input class="form-control" name="script_type" value="shell" readonly>
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                            <button type="submit" class="btn btn-primary">执行</button>
+                            <button type='reset' class='btn  btn-default'>重置</button>
+                        </div>
+                </div>
+                <!-- /.modal -->
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- /#page-wrapper -->
+{% endblock %}
+
+{% block jquery %}
+    <script src="/static/js/formatJSON.js"></script>
+    <script src="/static/js/bootstrap-multiselect.js"></script>
+    <script type="text/javascript">
+        function check() {
+            var nameValue = window.document.getElementById("select-hosts-mu").value;
+            if (nameValue == "") // 或者是!nameValue
+            {
+                window.alert("选择推送主机");
+                return false;
+            }
+            return true;
+        }
+        function check1() {
+            var project_name =
+                window.document.getElementById('id_project_name1').value;
+            if (project_name == '')
+            {
+                window.alert('请选择项目名称');
+                return false;
+            }
+            var nameValue = window.document.getElementById("select-hosts-mu1").value;
+            if (nameValue == "选择项目") // 或者是!nameValue
+            {
+                window.alert("选择推送主机");
+                return false;
+            }
+            return true;
+        }
+    </script>
+
+    <script type="text/javascript">
+        function getphpscripts(cnfid) {
+            $.ajax({
+                type: "GET",
+                url: "/executescripts/get_script_list?cnfid=" + cnfid + "&script_type=php",
+                dataType: 'json',
+                success: function (data) {
+                    $('input[name=sync_path]').val(data[0].sync_path + "script/");
+
+                    var hostlist = data[0].target_host.split(',');
+                    var scriptlist = data[0].script_file.split(',');
+                    for (var i = 0; i < hostlist.length; i++) {
+                        $("#select-hosts-mu").append('<option value="' + hostlist[i] + '">' + hostlist[i] + '</option>')
+                    }
+                    for (var i = 0; i < scriptlist.length; i++) {
+                        $("#select-script-file").append('<option value="' + data[0].sync_path + 'script/' + scriptlist[i] + '">' + scriptlist[i] + '</option>')
+                    }
+                    $(document).ready(function () {
+                        $('#select-hosts-mu').multiselect({
+                            nonSelectedText: '--请选择主机--',
+                            includeSelectAllOption: true,
+                            allSelectedText: '全部选则'
+                        });
+                    });
+                }
+
+            })
+        }
+
+        function getshellscripts(cnfid) {
+            $.ajax({
+                type: "GET",
+                url: "/executescripts/get_script_list?cnfid=" + cnfid + "&script_type=shell",
+                dataType: 'json',
+                success: function (data) {
+                    var hostlist = data[0].target_host.split(',');
+                    for (var i = 0; i < hostlist.length; i++) {
+                        $("#select-hosts-mu1").append('<option value="' + hostlist[i] + '">' + hostlist[i] + '</option>')
+                    }
+                    $(document).ready(function () {
+                        $('#select-hosts-mu1').multiselect({
+                            nonSelectedText: '--请选择主机--',
+                            includeSelectAllOption: true,
+                            allSelectedText: '全部选则'
+                        });
+                    });
+                }
+
+            })
+        }
+
+    </script>
+
+{% endblock %}

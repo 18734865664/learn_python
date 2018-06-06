@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block content %}
+    {% load pagination_tags %}
+    <div id="page-wrapper">
+        <div class="row">
+            <div class="col-lg-12">
+                <h2 class="page-header"></h2>
+            </div>
+            <!-- /.col-lg-12 -->
+        </div>
+        <!-- /.row -->
+        {% autopaginate exe_history 10 %}
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        脚本执行记录
+                    </div>
+                    <!-- /.panel-heading -->
+                    <div class="panel-body">
+                        <div class="dataTable_wrapper">
+                            <table class="table table-striped table-bordered table-hover" id="dataTables-example">
+                                <thead>
+                                <tr>
+                                    <th>脚本</th>
+                                    <th>任务ID</th>
+                                    <th>执行人</th>
+                                    <th>操作日期</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for t in exe_history %}
+                                    <tr class="odd gradeC">
+                                        <td style="display: none;">{{ t.id }}</td>
+                                        <td>{{ t.script_file }}</td>
+                                        <td><a href="" onclick="result('{{ t.job_id }}')" data-toggle="modal"
+                                               data-target="#myResult"><span class="line-clamp-1"><font
+                                                color="#17adff">{{ t.job_id }}</font></span></a></td>
+                                        <td>{{ t.username }}</td>
+                                        <td>{{ t.date_time }}</td>
+                                    </tr>
+                                    <div class="modal fade" id="myResult" tabindex="-1" role="dialog"
+                                         aria-labelledby="myModalLabel">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header text-center">
+                                                    <h4>详细信息
+                                                        <button type="button" class="close" data-dismiss="modal"
+                                                                aria-label="Close"><span
+                                                                aria-hidden="true">&times;</span></button>
+                                                    </h4>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <label for="result_data" class="sr-only"></label>
+                                                    <textarea id="result_data" STYLE="width: 100%; height:300px"
+                                                              readonly disabled></textarea>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    </div>
+                                    </div>
+
+                                {% endfor %}
+                    </tbody>
+                    </table>
+                    {% paginate %}
+                </div>
+                <!-- /.table-responsive -->
+            </div>
+            <!-- /.panel-body -->
+        </div>
+        <!-- /.panel -->
+    </div>
+    <!-- /.col-lg-12 -->
+{% endblock %}
+
+{% block jquery %}
+    <script src="/static/js/formatJSON.js"></script>
+    <script>
+        function result(jobid) {
+            $.ajax({
+                type: "GET",
+                url: "/histrecord/getjobscontent?jobid=" + jobid,
+                dataType: 'json',
+                success: function (data) {
+                    console.log(data[0])
+                    var rv = document.getElementById('result_data');
+                    rv.value = "";
+                    for (var k in data[0]) {
+                        var v = data[0][k];
+                        if (typeof v != 'object') {
+                            rv.value += "主机: " + k + " <----> " + "返回值： " + "\n" + v + "\n" + "\n";
+                        }
+                        else {
+                            rv.value += k + "\n" + formatJson(v, true) + "\n";
+                        }
+                    }
+
+
+                }
+
+            })
+        }
+    </script>
+
+{% endblock %}
