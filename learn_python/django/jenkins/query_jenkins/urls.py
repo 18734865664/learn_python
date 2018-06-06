@@ -15,10 +15,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from . import views
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path("jenkins/build/", include("build_jenkins.urls")),
-    path("jenkins/init/", include("initial_mysql.urls")),
-    path("jenkins/query/", include("query_jenkins.urls"))
+    path("", views.query)
 ]

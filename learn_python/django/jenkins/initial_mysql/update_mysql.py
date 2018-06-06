@@ -59,7 +59,28 @@ class updateMysql():
             cursor.execute(sql_build_num)
             db.commit()
             db.close()
- 
+
+        
+    def create_result_table(self):
+        # 实例化mysql
+        db = pymysql.connect(host = self.mysql_host, user = self.mysql_user, passwd = self.mysql_pass, port = int(self.mysql_port))
+        
+        # 创建游标对象
+        cursor = db.cursor() 
+  
+        # 如果表不存在，则创建表
+        sql2 = "create table if not exists jenkins_info.{}( \
+              `job_name` VARCHAR(100) NOT NULL, \
+              `build_id` int(3), \
+              `mvn_build_result` VARCHAR(100) NOT NULL DEFAULT 'NULL', \
+              `mvn_args`VARCHAR(50) NOT NULL DEFAULT '\[\"prod\"\]', \
+              `ftp_path` VARCHAR(200) NOT NULL DEFAULT 'NULL',  \
+              `docker_image_tag` VARCHAR(100) NOT NULL DEFAULT 'NULL' \
+              );".format(("job_result"))
+        cursor.execute(sql2)
+        db.commit()
+        db.close()
+
 
 if __name__ == "__main__":
     obj = updateMysql()
