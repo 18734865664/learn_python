@@ -27,12 +27,13 @@ def query(request):
         cursor.execute(sql)
         data = cursor.fetchall()[0]
         return_data = {
-            "branches_path" : data[5],
-            "mvn_args" : data[2],
-            "mvn_build_result" : data[3],
-            "mvn_failuer_result" : data[4],
-            "docker_image_tag" : data[1],
-            "ftp_path" : data[6],
+            "branches_path" : data[6],
+            "mvn_args" : data[3],
+            "mvn_build_result" : data[4],
+            "mvn_failuer_result" : data[5],
+            "docker_image_repository" : data[1],
+            "docker_image_tag" : data[2],
+            "ftp_path" : data[7],
         }
         return_json = json.dumps(return_data)
         return HttpResponse(return_json, content_type = "application/json") 

@@ -16,7 +16,11 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from . import views
+from . import celery
+from . import tasks
 
 urlpatterns = [
-    path("", views.build)
+    path("", views.build),
+    path("celery", celery.test),
+    # path("build", tasks.build),
 ]

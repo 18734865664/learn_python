@@ -11,6 +11,9 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 """
 
 import os
+import djcelery
+from celery import Celery, platforms
+platforms.C_FORCE_ROOT = True
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -27,6 +30,12 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['10.100.137.179']
 
+djcelery.setup_loader()
+# celery broker_user
+# BROKER_USER = 'django://'
+BROKER_URL= 'amqp://guest:guest@localhost:5672//'
+CELERY_RESULT_BACKEND = 'amqp://guest:guest@localhost:5672//'
+
 
 # Application definition
 
@@ -39,6 +48,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'build_jenkins',
     'query_jenkins',
+    'celery_task',
+    'djcelery',
 ]
 
 MIDDLEWARE = [

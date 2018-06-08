@@ -1,0 +1,12 @@
+# 安装rabbitmq 
+yum -y install erlang
+
+# rpm --import https://dl.bintray.com/rabbitmq/Keys/rabbitmq-release-signing-key.asc
+# # this example assumes the CentOS 7 version of the package
+# yum install rabbitmq-server-3.7.5-1.el7.noarch.rpm
+# chkconfig rabbitmq-server on
+# /sbin/service rabbitmq-server start
+wget http://www.rabbitmq.com/releases/rabbitmq-server/v3.6.6/rabbitmq-server-3.6.6-1.el7.noarch.rpm
+yum -y install socat
+yum install rabbitmq-server-3.6.6-1.el7.noarch.rpm 
+
