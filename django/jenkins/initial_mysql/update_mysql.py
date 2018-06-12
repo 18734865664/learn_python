@@ -10,9 +10,9 @@ from .get_args import getJenkinsArgs
 
 class updateMysql():
     def __init__(self):
-        self.mysql_host = "10.100.137.179"
-        self.mysql_user = "root"
-        self.mysql_pass = "123123"
+        self.mysql_host = "10.100.140.161"
+        self.mysql_user = "jenkins"
+        self.mysql_pass = "jenkins"
         self.mysql_port = "3306"
         self.mysql_dbname = "jenkins_info"
 
@@ -44,18 +44,18 @@ class updateMysql():
         db.close()
 
         # 获取job列表
-        job_name_file_obj = getFileList("/data/nfs/jenkins/jobs/").get_file_list()
+        job_name_file_obj = getFileList("/app/jenkins/jobs/").get_file_list()
         
         # 获取参数列表
         for job_name in job_name_file_obj:
             db = pymysql.connect(host = self.mysql_host, user = self.mysql_user, passwd = self.mysql_pass, port = int(self.mysql_port))
             cursor = db.cursor() 
-            job_workspace_file = '/data/nfs/jenkins/jobs/' + job_name
+            job_workspace_file = '/app/jenkins/jobs/' + job_name
             job_config_file = job_workspace_file + "/config.xml"
             obj = getJenkinsArgs(job_config_file, job_name)
             f = open(job_workspace_file + "/nextBuildNumber", 'r')
             build_num = f.readline()
-            sql_build_num = "update jenkins_info.job_args set laster_build_num={} where job_name = \"{}\";".format(build_num, job_name)
+            sql_build_num = "update jenkins_info.job_args set laster_build_num={} where job_name = \"{}\";".format(build_num, job_name.replace('-', '_'))
             cursor.execute(sql_build_num)
             db.commit()
             db.close()

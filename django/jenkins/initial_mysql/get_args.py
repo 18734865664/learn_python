@@ -18,9 +18,9 @@ get: 用来获取jenkins job配置文件，xml格式
 
 """
 
-mysql_host = "10.100.137.179"
-mysql_user = "root"
-mysql_pass = "123123"
+mysql_host = "10.100.140.161"
+mysql_user = "jenkins"
+mysql_pass = "jenkins"
 mysql_port = "3306"
 mysql_dbname = "jenkins_info"
 

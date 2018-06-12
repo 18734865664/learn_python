@@ -92,7 +92,7 @@ def build(data):
 
     return_json = json.dumps(return_info[data["jenkins_obj_name"][0]]) 
     # return HttpResponse(return_json, content_type="application/json")
-    subprocess.call(["curl -X POST http://10.100.137.179:8000/jenkins/build/celery -d 'return_data=\"{}\"'".format(return_json)], shell=True)
+    subprocess.call(["curl -X POST http://10.100.140.161:8000/jenkins/build/celery -d 'return_data=\"{}\"'".format(return_json)], shell=True)
         
 
 def build_job(job_name_queue, timestamp, jenkins_obj_name):
@@ -121,7 +121,7 @@ def build_job(job_name_queue, timestamp, jenkins_obj_name):
                 "ftp_path": build_args[3],
                 "mvn_args": build_args[4],
                 "subitems": build_args[5],
-                "next_build_num": int(build_args[6]) + 1,
+                "next_build_num": int(build_args[6]),
                 "lock_job" : int(build_args[7])
             }
 
@@ -133,7 +133,7 @@ def build_job(job_name_queue, timestamp, jenkins_obj_name):
                 cursor.execute(sql_query_lock)
                 build_args_tmp = list(cursor.fetchall()[0])
                 data["lock_job"] = int(build_args_tmp[7])
-                data["next_build_num"] = int(build_args_tmp[6]) + 1
+                data["next_build_num"] = int(build_args_tmp[6])
                 if build_args_tmp[7] == 0:
                     time.sleep(1)
                     sql_set_lock = "update jenkins_info.job_args set lock_job = 1, laster_build_num = \"{}\" where job_name = \"{}\"".format(str(int(data["next_build_num"])), build_job_name.replace('-', '_'))
@@ -147,7 +147,7 @@ def build_job(job_name_queue, timestamp, jenkins_obj_name):
             # 初始化参数表后，默认ftp_path是当天的目录，如果传入参数中上线时间不为空，则替换该参数
             if timestamp:
                 data["ftp_path"] = data["ftp_path"].split("_v0.0_")[0] + "_v0.0_" + str(timestamp)
-            return_info[jenkins_obj_name][build_job_name] = int(build_args[6]) + 1
+            return_info[jenkins_obj_name][build_job_name] = int(build_args[6])
             data_tmp = ''
 
             

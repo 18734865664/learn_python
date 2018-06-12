@@ -28,7 +28,7 @@ SECRET_KEY = 'g44f@izph&rj31i$$lqwhk8^0djn=+^82j)th)0iq@zy$@$)*t'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['10.100.137.179']
+ALLOWED_HOSTS = ['10.100.137.179','10.100.140.161']
 
 djcelery.setup_loader()
 # celery broker_user
@@ -133,7 +133,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 # mysql
-MYSQL_HOST = "10.100.137.179"
+MYSQL_HOST = "127.0.0.1"
 MYSQL_USER = "root"
 MYSQL_PASS = "123123"
 MYSQL_PORT = 3306

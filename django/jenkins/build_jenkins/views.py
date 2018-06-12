@@ -27,6 +27,8 @@ def build(request):
         jenkins_obj = request.POST['jenkins_obj']
         # timestamp = request.POST['timestamp']
         data = json.loads(jenkins_obj)
+        obj = updateMysql()
+        obj.create_job_args_table()
         tasks_build.delay(data)
         # print(len(data["jenkins_obj_name"]))
         return HttpResponse("test")
