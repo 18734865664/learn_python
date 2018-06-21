@@ -121,5 +121,5 @@ class  getJenkinsArgs():
         
 
 if __name__ == "__main__":
-    obj = getJenkinsArgs("config.xml", 'test')
+    obj = getJenkinsArgs("config.xml", 'ceshi_pip')
     
