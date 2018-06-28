@@ -1,7 +1,6 @@
-#! /usr/local/python3/bin/python3
+#! /usr/local/python3.4.4/bin/python3
 # encoding: utf-8
 
-from celery_task.tasks import add
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 import os

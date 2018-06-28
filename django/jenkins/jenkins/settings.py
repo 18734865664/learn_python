@@ -48,7 +48,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'build_jenkins',
     'query_jenkins',
-    'celery_task',
     'djcelery',
 ]
 

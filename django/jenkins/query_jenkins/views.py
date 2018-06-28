@@ -5,6 +5,11 @@ from django.views.decorators.csrf import csrf_exempt
 import pymysql
 import json
 
+'''
+接收调用方传入的 项目名+build_id
+回传查询到的构建记录详情
+
+'''
 
 # Create your views here.
 

@@ -21,6 +21,6 @@ from . import tasks
 
 urlpatterns = [
     path("", views.build),
-    path("celery", celery.test),
     # path("build", tasks.build),
+    path("celery", celery.test),
 ]

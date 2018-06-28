@@ -1,4 +1,4 @@
-#! /usr/local/python3/bin/python3
+#! /usr/local/python3.4.4/bin/python3
 # encoding:utf-8
 # author: qiangguo
 # last_modify

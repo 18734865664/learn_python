@@ -16,6 +16,11 @@ import time
 from celery import Celery
 from .tasks import build as tasks_build
 
+
+'''
+接收到请求，调用tasks.py中函数，处理收到的参数列表
+'''
+
 @csrf_exempt
 def build(request):
     # 接收request请求
@@ -24,11 +29,8 @@ def build(request):
     
     elif request.method == "POST":
         # print("收到post请求")
-        jenkins_obj = request.POST['jenkins_obj']
-        # timestamp = request.POST['timestamp']
+        # 解析出请求中的参数json
+        jenkins_obj = request.POST['jenkins_obj_list']
         data = json.loads(jenkins_obj)
-        obj = updateMysql()
-        obj.create_job_args_table()
         tasks_build.delay(data)
-        # print(len(data["jenkins_obj_name"]))
         return HttpResponse("test")

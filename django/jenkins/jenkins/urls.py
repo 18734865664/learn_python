@@ -20,5 +20,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path("jenkins/build/", include("build_jenkins.urls")),
     path("jenkins/init/", include("initial_mysql.urls")),
-    path("jenkins/query/", include("query_jenkins.urls"))
+    path("jenkins/query/", include("query_jenkins.urls")),
 ]
